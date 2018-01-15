@@ -1,0 +1,57 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Vim swap
+.*.sw[op]
+
+# Distribution / packaging
+.Python
+/build/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.coverage
+cover
+
+# Translations
+*.mo
+*.pot
+
+# Sphinx documentation
+docs/_build/
+
+# misc
+.DS_Store
+
+# Ignore project files
+.idea/
+*.iml
+.project
+.pydevproject
+.ropeproject
+.settings
+.uwsgi-reload
+/.vscode/
+
+# Build artifacts
+node_modules/
