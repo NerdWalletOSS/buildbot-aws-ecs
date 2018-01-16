@@ -1,0 +1,28 @@
+attrs==17.4.0             # via automat
+autobahn==17.10.1         # via buildbot
+automat==0.6.0            # via twisted
+boto3==1.5.7
+botocore==1.8.21          # via boto3, s3transfer
+buildbot==0.9.15.post1
+constantly==15.1.0        # via twisted
+decorator==4.1.2          # via sqlalchemy-migrate
+docutils==0.14            # via botocore
+future==0.16.0            # via buildbot
+futures==3.2.0            # via s3transfer
+hyperlink==17.3.1         # via twisted
+incremental==17.5.0       # via twisted
+jinja2==2.9.6             # via buildbot
+jmespath==0.9.3           # via boto3, botocore
+markupsafe==1.0           # via jinja2
+pbr==3.1.1                # via sqlalchemy-migrate
+pyjwt==1.5.2              # via buildbot
+python-dateutil==2.6.1    # via botocore, buildbot
+s3transfer==0.1.12        # via boto3
+six==1.11.0
+sqlalchemy-migrate==0.11.0  # via buildbot
+sqlalchemy==1.2.1         # via buildbot, sqlalchemy-migrate
+sqlparse==0.2.4           # via sqlalchemy-migrate
+tempita==0.5.2            # via sqlalchemy-migrate
+twisted==17.9.0           # via buildbot
+txaio==2.8.2              # via autobahn, buildbot
+zope.interface==4.4.3     # via buildbot, twisted
