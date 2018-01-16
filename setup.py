@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
 
 install_requires = [
-    'six>=1.10.0',
-    'buildbot>=0.9.15',
+    'six>=1.10.0,<2.0',
+    'buildbot>=0.9.15,<1.0',
+    'boto3>=1.5.0,<2.0',
 ]
 
 with open('VERSION') as version_fd:
