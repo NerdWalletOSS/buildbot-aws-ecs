@@ -22,20 +22,16 @@ class ECSWorker(AbstractLatentWorker):
         self.boto3_session = boto3_session or boto3.Session()
         self.ecs = self.boto3_session.client('ecs')
 
+        assert 'cluster' in task_kwargs
+        assert 'taskDefinition' in task_kwargs
+
     @defer.inlineCallbacks
     def start_instance(self, build):
         if self.instance is not None:
-            log.msg("Cannot start %s -- already active!", self.workername)
+            log.err("Cannot start %s -- already active!", self.workername)
             defer.returnValue(False)
+            return
 
-        yield threads.deferToThread(self._start_instance)
-
-    @defer.inlineCallbacks
-    def stop_instance(self, fast=False):
-        if self.instance is None:
-            defer.returnValue(None)
-
-    def _start_instance(self):
         # setup the task kwargs for this specific instance
         # * copy the kwargs provided
         # * set count, startedBy & group
@@ -56,9 +52,34 @@ class ECSWorker(AbstractLatentWorker):
                 ]
             ),
             count=1,
-            startedBy='buildbot', # buildbot installation name?
-            group='buildbot', # buildbot installation name?
+            startedBy='buildbot',  # buildbot installation name?
+            group='buildbot',  # buildbot installation name?
         ))
 
         # start the task
-        resp = self.ecs.run_task(**task_kwargs)
+        resp = yield threads.deferToThread(self.ecs.run_task, **task_kwargs)
+
+        if len(resp['failures']) > 0:
+            log.err("Failed to start ECS task for %s: %s", self.workername, resp['failures'][0]['reason'])
+            defer.returnValue(False)
+            return
+
+        self.instance = resp['tasks'][0]['taskArn']
+
+        waiter = self.ecs.get_waiter('tasks_running')
+        yield threads.deferToThread(waiter.wait, cluster=self.task_kwargs['cluster'], tasks=[self.instance])
+
+        defer.returnValue(True)
+
+    @defer.inlineCallbacks
+    def stop_instance(self, fast=False):
+        if self.instance is None:
+            defer.returnValue(None)
+
+        yield threads.deferToThread(self.ecs.stop_task, cluster=self.task_kwargs['cluster'], task=self.instance)
+
+        if not fast:
+            waiter = self.ecs.get_waiter('tasks_stopped')
+            yield threads.deferToThread(waiter.wait, cluster=self.task_kwargs['cluster'], tasks=[self.instance])
+
+        defer.returnValue(True)
