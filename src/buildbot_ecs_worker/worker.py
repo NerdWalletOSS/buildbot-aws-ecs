@@ -61,11 +61,22 @@ class ECSWorker(AbstractLatentWorker):
     :param str master_host: If specified can be ``hostname`` or ``hostname:port``, otherwise defaults to the master fdqn
     :param int build_wait_timeout: Defaults to 0 for ECS tasks so each build runs in a fresh container
     """
-    def __init__(self, name, run_task_kwargs, container_name='buildbot', boto3_session=None, master_host=None,
-                 build_wait_timeout=0, **kwargs):
+
+    def checkConfig(self, name, run_task_kwargs, container_name='buildbot', boto3_session=None, master_host=None,
+                    build_wait_timeout=0, **kwargs):
+        if 'cluster' not in run_task_kwargs:
+            config.error("You must specify a cluster in the ECSWorker run_task_kwargs")
+
+        if 'taskDefinition' not in run_task_kwargs:
+            config.error("You must specify a taskDefinition in the ECSWorker run_task_kwargs")
+
+        return AbstractLatentWorker.checkConfig(self, name, password=None, build_wait_timeout=build_wait_timeout,
+                                                **kwargs)
+
+    def reconfigService(self, name, run_task_kwargs, container_name='buildbot', boto3_session=None, master_host=None,
+                        build_wait_timeout=0, **kwargs):
         # create a random password for this worker
-        password = self.getRandomPass()
-        AbstractLatentWorker.__init__(self, name, password, build_wait_timeout=build_wait_timeout, **kwargs)
+        password = kwargs.pop('password', self.getRandomPass())
 
         self.master_host = master_host or socket.getfqdn()
         self.run_task_kwargs = run_task_kwargs
@@ -74,11 +85,8 @@ class ECSWorker(AbstractLatentWorker):
         self.ecs = self.boto3_session.client('ecs')
         self.task_arn = None
 
-        if 'cluster' not in run_task_kwargs:
-            config.error("You must specify a cluster in the ECSWorker run_task_kwargs")
-
-        if 'taskDefinition' not in run_task_kwargs:
-            config.error("You must specify a taskDefinition in the ECSWorker run_task_kwargs")
+        return AbstractLatentWorker.reconfigService(self, name, password=password,
+                                                    build_wait_timeout=build_wait_timeout, **kwargs)
 
     @defer.inlineCallbacks
     def start_instance(self, build):
